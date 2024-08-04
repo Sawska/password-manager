@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.13)
+project(simple_example)
+
+set(CMAKE_CXX_STANDARD 14)
+
+set(SOURCE_FILES main.cpp PasswordManager.cpp PasswordUnit.cpp PasswordManager.h PasswordUnit.h)
+
+# Include directories
+include_directories(/opt/homebrew/Cellar/mysql-connector-c++/8.3.0/include)
+include_directories(/opt/homebrew/Cellar/asio/1.30.2/include)
+include_directories(/Users/alexanderkorzh/Desktop/coding/password_manager/cpp-terminal/include)
+include_directories(/Users/alexanderkorzh/vcpkg/downloads/Crow-1.2.0/include)
+
+
+link_directories(/opt/homebrew/Cellar/mysql-connector-c++/8.3.0/lib)
+link_directories(/opt/homebrew/Cellar/asio/1.30.2/lib)
+link_directories(/Users/alexanderkorzh/Desktop/coding/password_manager/cpp-terminal/lib)
+link_directories(include_directories/Users/alexanderkorzh/vcpkg/downloads/Crow-1.2.0/lib)
+
+
+add_executable(simple_example ${SOURCE_FILES})
+
+
+target_link_libraries(simple_example mysqlcppconn)

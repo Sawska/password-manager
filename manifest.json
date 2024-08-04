@@ -1,0 +1,32 @@
+{
+    "manifest_version": 2,
+    "name": "Password Manager",
+    "version": "1.0",
+    "description": "Captures form data and sends it to a local server.",
+    "permissions": [
+      "declarativeContent",
+      "webNavigation",
+      "activeTab",
+      "tabs",
+      "http://localhost:8080/"
+    ],
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://*/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "page_action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+      }
+    }
+  }
+  

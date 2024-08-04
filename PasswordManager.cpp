@@ -9,7 +9,18 @@ using namespace mysqlx;
 PasswordManager::PasswordManager()
     : sess(URL)
 {
-    
+    try {
+        Schema db  = sess.getSchema("password_manager_db");
+        sess.sql("CREATE TABLE IF NOT EXISTS passwords ("
+        "domain_name VARCHAR(255) NOT NULL, "
+        "login VARCHAR(255) NOT NULL, "
+        "password VARCHAR(255) NOT NULL, "
+        "PRIMARY KEY (domain_name, login))").execute();
+
+        cout << "Table 'passwords' ensure to exist," << endl;
+    } catch(const mysqlx::Error &err) {
+        cerr << "Error:" << err.what() << endl;
+    }
 }
 
 void PasswordManager::add_password(const std::string& domain_name, const std::string& login, const std::string& password)
@@ -22,11 +33,32 @@ void PasswordManager::add_password(const std::string& domain_name, const std::st
             .values(domain_name, login, password)
             .execute();
 
-        cout << "Password added successfully." << endl;
+        std::cout << "Password added successfully." << endl;
     }
     catch (const mysqlx::Error &err) {
         cerr << "Error: " << err.what() << endl;
     }
+}
+
+vector<PasswordUnit> PasswordManager::select_all() {
+    vector<PasswordUnit> result;
+    try {
+        Schema db = sess.getSchema("password_manager_db");
+        Table passwords = db.getTable("passwords");
+
+        RowResult rows = passwords.select("domain_name", "login", "password").execute();
+
+        for (Row row : rows) {
+            std::string domain_name = row[0].get<std::string>();
+            std::string login = row[1].get<std::string>();
+            std::string password = row[2].get<std::string>();
+            result.emplace_back(domain_name, login, password);
+        }
+
+    } catch (const mysqlx::Error &err) {
+        cerr << "Error: " << err.what() << endl;
+    }
+    return result;
 }
 
 void PasswordManager::remove_password_by_domain(const std::string& domain_name)
@@ -40,7 +72,7 @@ void PasswordManager::remove_password_by_domain(const std::string& domain_name)
             .bind("domain_name", domain_name)
             .execute();
 
-        cout << "Password(s) removed successfully for domain: " << domain_name << endl;
+        std::cout << "Password(s) removed successfully for domain: " << domain_name << endl;
     }
     catch (const mysqlx::Error &err) {
         cerr << "Error: " << err.what() << endl;

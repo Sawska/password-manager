@@ -32,6 +32,11 @@ public:
         std::memcpy(this->iv, iv, AES::BLOCKSIZE);
         this->password = encryptPassword(password);
     }
+       PasswordUnit(const std::string& domain, const std::string& login, const std::string& password)
+        : domain_name(domain), login(login),  
+          key(CryptoPP::SecByteBlock(16)), iv() {
+            this->password = encryptPassword(password);
+    }
 
     std::string getPassword() const {
         return decryptPassword(password);
