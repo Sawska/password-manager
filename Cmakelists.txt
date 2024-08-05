@@ -1,24 +1,29 @@
 cmake_minimum_required(VERSION 3.13)
 project(simple_example)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
-set(SOURCE_FILES main.cpp PasswordManager.cpp PasswordUnit.cpp PasswordManager.h PasswordUnit.h)
 
-# Include directories
+set(SOURCE_FILES main.cpp PasswordManager.cpp PasswordManager.h PasswordUnit.h)
+
+
 include_directories(/opt/homebrew/Cellar/mysql-connector-c++/8.3.0/include)
 include_directories(/opt/homebrew/Cellar/asio/1.30.2/include)
-include_directories(/Users/alexanderkorzh/Desktop/coding/password_manager/cpp-terminal/include)
+include_directories(/usr/local/include)  
 include_directories(/Users/alexanderkorzh/vcpkg/downloads/Crow-1.2.0/include)
-
-
-link_directories(/opt/homebrew/Cellar/mysql-connector-c++/8.3.0/lib)
-link_directories(/opt/homebrew/Cellar/asio/1.30.2/lib)
-link_directories(/Users/alexanderkorzh/Desktop/coding/password_manager/cpp-terminal/lib)
-link_directories(include_directories/Users/alexanderkorzh/vcpkg/downloads/Crow-1.2.0/lib)
+include_directories(/opt/homebrew/Cellar/cryptopp/8.9.0/include)
+include_directories(/opt/homebrew/Cellar/libpqxx/7.9.2/include)
 
 
 add_executable(simple_example ${SOURCE_FILES})
 
 
-target_link_libraries(simple_example mysqlcppconn)
+target_link_libraries(simple_example 
+    /opt/homebrew/Cellar/mysql-connector-c++/8.3.0/lib/libmysqlcppconn8.2.8.3.0.dylib
+    /opt/homebrew/Cellar/mysql-connector-c++/8.3.0/lib/libmysqlcppconn8.2.dylib
+    /opt/homebrew/Cellar/mysql-connector-c++/8.3.0/lib/libmysqlcppconn8.dylib
+    /usr/local/lib/libcpp-terminal.a
+    /usr/local/lib/libcpp-terminal-private.a
+    /opt/homebrew/Cellar/cryptopp/8.9.0/lib/libcryptopp.dylib
+    /opt/homebrew/Cellar/libpqxx/7.9.2/lib/libpqxx.dylib
+)

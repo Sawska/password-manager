@@ -2,12 +2,11 @@
 #define PASSWORDMANAGER_H
 
 #include <string>
-#include <mysqlx/xdevapi.h>
+#include <vector>
+#include <pqxx/pqxx>
 #include "PasswordUnit.h"
 
-const std::string URL = "mysqlx://root@127.0.0.1";
-
-using namespace mysqlx;
+const std::string CONNECTION_STRING = "dbname=passwords user=postgres password=AlexLinov hostaddr=localhost port=5432";
 
 class PasswordManager {
 public:
@@ -15,12 +14,13 @@ public:
 
     void add_password(const std::string& domain_name, const std::string& login, const std::string& password);
     void remove_password_by_domain(const std::string& domain_name);
-    void update_password(PasswordUnit unit);
+    void update_password(const PasswordUnit& unit);
     std::vector<PasswordUnit> select_all();
     PasswordUnit select_from_passwords(const std::string& domain_name = "", const std::string& login = "", const std::string& password = "");
 
 private:
-    Session sess;
+    pqxx::connection c;
+    pqxx::work tx;
 };
 
 #endif // PASSWORDMANAGER_H

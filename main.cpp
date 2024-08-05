@@ -5,7 +5,7 @@
 #include <iostream>
 #include "crow.h"
 
-std::string SECRET_PASSWORD = "example";
+std::string SECRET_PASSWORD = "";
 
 void addPassword(PasswordManager& pm) {
     std::string domain_name, login, password;
@@ -78,16 +78,19 @@ int main() {
     Term::Terminal term;
 
     std::cout << Term::color_fg(Term::Color::Name::Red) << "Welcome to Password Manager" << Term::color_fg(Term::Color::Name::Default) << std::endl;
+    // std::cout <<  "Welcome to Password Manager" << std::endl;
 
     std::string password;
 
     if (SECRET_PASSWORD.empty()) {
         std::cout << Term::color_fg(Term::Color::Name::Red) << "Please create a secret password" << Term::color_fg(Term::Color::Name::Default) << std::endl;
+        // std::cout << "Please create a secret password"  << std::endl;
         std::cin >> SECRET_PASSWORD;
     }
 
     while (SECRET_PASSWORD != password) {
         std::cout << Term::color_fg(Term::Color::Name::Red) << "Please enter your secret password" << Term::color_fg(Term::Color::Name::Default) << std::endl;
+        // std::cout << "Please enter your secret password"  << std::endl;
         std::cin >> password;
     }
 
@@ -96,6 +99,7 @@ int main() {
     int option = 0;
     while (option != 6) {
         std::cout << Term::color_fg(Term::Color::Name::Blue) << "Please enter an option" << Term::color_fg(Term::Color::Name::Default) << std::endl;
+        std::cout << "Please enter an option" <<  std::endl;
         std::cout << "1) Show passwords" << std::endl;
         std::cout << "2) Add password" << std::endl;
         std::cout << "3) Update password" << std::endl;
