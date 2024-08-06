@@ -62,19 +62,20 @@ private:
     }
 
     std::string decryptPassword(const std::string& ciphertext) const {
-        std::string decryptedtext;
-        try {
-            CBC_Mode<AES>::Decryption decryption;
-            decryption.SetKeyWithIV(key, key.size(), iv);
+    std::string decryptedtext;
+    try {
+        CBC_Mode<AES>::Decryption decryption;
+        decryption.SetKeyWithIV(key, key.size(), iv);
 
-            StringSource(ciphertext, true, new StreamTransformationFilter(decryption, new StringSink(decryptedtext)));
-        } catch (const Exception& e) {
-            cerr << "Decryption error: " << e.what() << endl;
-            throw;
-        }
-
-        return decryptedtext;
+        
+        StringSource(ciphertext, true, new StreamTransformationFilter(decryption, new StringSink(decryptedtext)));
+    } catch (const Exception& e) {
+        std::cerr << "Decryption error: " << e.what() << std::endl;
+        throw;
     }
+
+    return decryptedtext;
+}
 };
 
 #endif // PASSWORDUNIT_H

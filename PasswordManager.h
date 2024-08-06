@@ -5,8 +5,10 @@
 #include <vector>
 #include <pqxx/pqxx>
 #include "PasswordUnit.h"
+#include <boost/locale.hpp>
 
-const std::string CONNECTION_STRING = "dbname=passwords user=postgres password=AlexLinov hostaddr=localhost port=5432";
+
+std::string getConnectionString();
 
 class PasswordManager {
 public:
@@ -20,7 +22,7 @@ public:
 
 private:
     pqxx::connection c;
-    pqxx::work tx;
+    
 };
 
 #endif // PASSWORDMANAGER_H
