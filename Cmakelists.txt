@@ -27,4 +27,5 @@ target_link_libraries(simple_example
     /opt/homebrew/Cellar/cryptopp/8.9.0/lib/libcryptopp.dylib
     /opt/homebrew/Cellar/libpqxx/7.9.2/lib/libpqxx.dylib
     ${Boost_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
 )

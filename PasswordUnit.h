@@ -21,21 +21,18 @@ public:
     std::string login;
     std::string password;
 
-    
     PasswordUnit() : key(AES::DEFAULT_KEYLENGTH) {
-        std::memset(iv, 0, AES::BLOCKSIZE);
+        AutoSeededRandomPool rng;
+        rng.GenerateBlock(key, key.size()); 
+        rng.GenerateBlock(iv, AES::BLOCKSIZE);
     }
 
-    
-    PasswordUnit(const std::string& domain, const std::string& login, const std::string& password, const SecByteBlock& key, const CryptoPP::byte* iv)
-        : domain_name(domain), login(login), key(key) {
-        std::memcpy(this->iv, iv, AES::BLOCKSIZE);
+    PasswordUnit(const std::string& domain, const std::string& login, const std::string& password)
+        : domain_name(domain), login(login), key(AES::DEFAULT_KEYLENGTH) {
+        AutoSeededRandomPool rng;
+        rng.GenerateBlock(key, key.size());
+        rng.GenerateBlock(iv, AES::BLOCKSIZE);
         this->password = encryptPassword(password);
-    }
-       PasswordUnit(const std::string& domain, const std::string& login, const std::string& password)
-        : domain_name(domain), login(login),  
-          key(CryptoPP::SecByteBlock(16)), iv() {
-            this->password = encryptPassword(password);
     }
 
     std::string getPassword() const {
@@ -47,35 +44,38 @@ private:
     CryptoPP::byte iv[AES::BLOCKSIZE];
 
     std::string encryptPassword(const std::string& plaintext) const {
-        std::string ciphertext;
-        try {
-            CBC_Mode<AES>::Encryption encryption;
-            encryption.SetKeyWithIV(key, key.size(), iv);
+    std::string ciphertext;
+    try {
+        CBC_Mode<AES>::Encryption encryption;
+        encryption.SetKeyWithIV(key, key.size(), iv);
 
-            StringSource(plaintext, true, new StreamTransformationFilter(encryption, new StringSink(ciphertext)));
-        } catch (const Exception& e) {
-            cerr << "Encryption error: " << e.what() << endl;
-            throw;
-        }
-
-        return ciphertext;
+        
+        StringSource(plaintext, true, new StreamTransformationFilter(encryption, new StringSink(ciphertext), StreamTransformationFilter::PKCS_PADDING));
+    } catch (const Exception& e) {
+        cerr << "Encryption error: " << e.what() << endl;
+        throw;
     }
 
-    std::string decryptPassword(const std::string& ciphertext) const {
+    return ciphertext;
+}
+
+std::string decryptPassword(const std::string& ciphertext) const {
     std::string decryptedtext;
     try {
         CBC_Mode<AES>::Decryption decryption;
         decryption.SetKeyWithIV(key, key.size(), iv);
 
         
-        StringSource(ciphertext, true, new StreamTransformationFilter(decryption, new StringSink(decryptedtext)));
+        StringSource(ciphertext, true, new StreamTransformationFilter(decryption, new StringSink(decryptedtext), StreamTransformationFilter::PKCS_PADDING));
     } catch (const Exception& e) {
-        std::cerr << "Decryption error: " << e.what() << std::endl;
+        cerr << "Decryption error: " << e.what() << endl;
         throw;
     }
 
     return decryptedtext;
 }
+
+
 };
 
 #endif // PASSWORDUNIT_H
