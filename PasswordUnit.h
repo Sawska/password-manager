@@ -53,8 +53,8 @@ private:
             StringSource(cipherText, true,
                 new StreamTransformationFilter(decryption,
                     new StringSink(recoveredText)
-                ) // StreamTransformationFilter
-            ); // StringSource
+                ) 
+            ); 
         } catch (const Exception& e) {
             cerr << "Decryption error: " << e.what() << endl;
         }

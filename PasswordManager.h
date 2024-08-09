@@ -12,7 +12,7 @@ std::string getConnectionString();
 class PasswordManager {
 public:
     PasswordManager(); 
-    void add_password(PasswordUnit unit);
+    void add_password(std::string domain_name,std::string login,std::string password);
     void remove_password(const std::string& domain_name = "", const std::string& login = "", const std::string& password = "");
     void update_password(const PasswordUnit& unit);
     std::vector<PasswordUnit> select_all();

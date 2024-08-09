@@ -33,14 +33,14 @@ void addPassword(PasswordManager& pm) {
     std::cout << Term::color_fg(Term::Color::Name::Red) << "Enter password: " << Term::color_fg(Term::Color::Name::Default) << std::endl;
     std::cin >> password;
 
-    // Validate the password
+    
     if (!isValidPassword(password)) {
         std::cout << Term::color_fg(Term::Color::Name::Red) << "Invalid password! Password contains invalid characters." << Term::color_fg(Term::Color::Name::Default) << std::endl;
         return;
     }
 
-    PasswordUnit unit(domain_name, login, password);
-    pm.add_password(unit);
+    
+    pm.add_password(domain_name, login, password);
     std::cout << Term::color_fg(Term::Color::Name::Blue) << "Password added successfully!" << Term::color_fg(Term::Color::Name::Default) << std::endl;
 }
 
@@ -100,7 +100,6 @@ void showPasswords(PasswordManager& pm) {
     }
 
     PasswordUnit pu = pm.select_from_passwords(domain_name, login, password);
-    std::cout << "Encrypted Password: " << pu.password << std::endl;
 
     try {
         std::cout << Term::color_fg(Term::Color::Name::Blue) << "Domain: " << pu.domain_name 
@@ -139,32 +138,38 @@ void updateSecretPassword() {
     std::cout << Term::color_fg(Term::Color::Name::Green) << "Secret password updated successfully!"  << Term::color_fg(Term::Color::Name::Default) << std::endl;
 }
 
-void runServer() {
+void runServer(PasswordManager& pm) {
     crow::SimpleApp app;
     crow::mustache::set_base(".");
 
     CROW_ROUTE(app, "/store_form_data")
-    .methods("POST"_method)
-    ([&](const crow::request& req){
-        auto x = crow::json::load(req.body);
-        if (!x)
-            return crow::response(400);
+.methods("POST"_method)
+([&](const crow::request& req){
+    auto x = crow::json::load(req.body);
+    if (!x)
+        return crow::response(400);
 
-        std::string domain_name = x["domain"].s();
-        std::string login = x["login"].s();
-        std::string password = x["password"].s();
+    std::string domain_name = x["domain"].s();
+    std::string login = x["login"].s();
+    std::string password = x["password"].s();
 
-        PasswordManager pm;
-        PasswordUnit unit(domain_name, login, password);
-        pm.add_password(unit);
+    PasswordUnit unit(domain_name, login, password);
+    // std::string decryptedPassword = unit.getPassword();
+    // std::cout << "Decrypted Password: " << decryptedPassword << std::endl;
+    // std::cout << "Decrypted Password: " << unit.password << std::endl;
+    pm.add_password(domain_name,login,password);
 
-        crow::json::wvalue res;
-        res["status"] = "success";
-        return crow::response(res);
-    });
+    
+
+    crow::json::wvalue res;
+    res["status"] = "success";
+    return crow::response(res);
+});
+
 
     app.port(8080).multithreaded().run();
 }
+
 
 int main() {
     
@@ -238,7 +243,7 @@ int main() {
                     removePassword(pm);
                     break;
                 case 7:
-                    server_thread = std::thread(runServer);
+                    server_thread = std::thread(runServer, std::ref(pm));
                     server_thread.detach();
                     std::cout << Term::color_fg(Term::Color::Name::Green) << "Server running on port 8080" << Term::color_fg(Term::Color::Name::Default) << std::endl;
                     break;

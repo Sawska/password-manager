@@ -69,11 +69,14 @@ PasswordManager::PasswordManager()
     }
 }
 
-void PasswordManager::add_password(PasswordUnit unit) {
+void PasswordManager::add_password(std::string domain_name,std::string login,std::string password) {
     try {
+        PasswordUnit unit(domain_name, login, password);
         std::string domain_name = boost::locale::conv::to_utf<char>(unit.domain_name, "UTF-8");
         std::string login = boost::locale::conv::to_utf<char>(unit.login, "UTF-8");
         std::string password = boost::locale::conv::to_utf<char>(unit.password, "UTF-8");
+
+        std::cout << password << std::endl;
 
         pqxx::work tx{c};
         tx.exec_prepared("insert_password", domain_name, login, password);
