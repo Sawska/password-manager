@@ -138,37 +138,85 @@ void updateSecretPassword() {
     std::cout << Term::color_fg(Term::Color::Name::Green) << "Secret password updated successfully!"  << Term::color_fg(Term::Color::Name::Default) << std::endl;
 }
 
+std::string join(const std::vector<std::string>& vec, const std::string& delimiter) {
+    std::ostringstream oss;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i != 0) {
+            oss << delimiter;
+        }
+        oss << vec[i];
+    }
+    return oss.str();
+}
+
 void runServer(PasswordManager& pm) {
     crow::SimpleApp app;
     crow::mustache::set_base(".");
 
     CROW_ROUTE(app, "/store_form_data")
-.methods("POST"_method)
-([&](const crow::request& req){
-    auto x = crow::json::load(req.body);
-    if (!x)
-        return crow::response(400);
+    .methods("POST"_method)
+    ([&](const crow::request& req) {
+        auto x = crow::json::load(req.body);
+        crow::json::wvalue res;
 
-    std::string domain_name = x["domain"].s();
-    std::string login = x["login"].s();
-    std::string password = x["password"].s();
+        if (!x) {
+            res["status"] = "error";
+            res["message"] = "Invalid JSON payload";
+            crow::response response(res);
+            response.add_header("Access-Control-Allow-Origin", "*"); 
+            response.add_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+            response.add_header("Access-Control-Allow-Headers", "Content-Type");
+            return response;
+        }
 
-    PasswordUnit unit(domain_name, login, password);
-    // std::string decryptedPassword = unit.getPassword();
-    // std::cout << "Decrypted Password: " << decryptedPassword << std::endl;
-    // std::cout << "Decrypted Password: " << unit.password << std::endl;
-    pm.add_password(domain_name,login,password);
+        
+        std::vector<std::string> missing_keys;
+        if (!x.has("domain")) {
+            missing_keys.push_back("domain");
+        }
+        if (!x.has("login")) {
+            missing_keys.push_back("login");
+        }
+        if (!x.has("password")) {
+            missing_keys.push_back("password");
+        }
 
-    
+        if (!missing_keys.empty()) {
+            res["status"] = "error";
+            res["message"] = "Missing keys: " + join(missing_keys, ", ");
+        std::cout << "Missing keys: " + join(missing_keys, ", ") << std::endl;
+            crow::response response(res);
+            response.add_header("Access-Control-Allow-Origin", "*"); 
+            response.add_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+            response.add_header("Access-Control-Allow-Headers", "Content-Type");
+            return response;
+        }
 
-    crow::json::wvalue res;
-    res["status"] = "success";
-    return crow::response(res);
-});
 
+        std::string domain_name = x["domain"].s();
+        std::string login = x["login"].s();
+        std::string password = x["password"].s();
+
+        PasswordUnit unit(domain_name, login, password);
+        pm.add_password(domain_name, login, password);
+
+        res["status"] = "success";
+
+        crow::response response(res);
+        response.add_header("Access-Control-Allow-Origin", "*"); 
+        response.add_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+        response.add_header("Access-Control-Allow-Headers", "Content-Type");
+
+        return response;
+    });
 
     app.port(8080).multithreaded().run();
 }
+
+
+
+
+
 
 
 int main() {
