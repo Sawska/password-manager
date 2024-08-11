@@ -28,8 +28,8 @@ public:
     }
 
 private:
-    std::string key = "0123456789abcdef"; // 16-byte key for AES-128
-    std::string iv = "abcdef0123456789";  // 16-byte IV for AES-128
+    std::string key = "0123456789abcdef"; 
+    std::string iv = "abcdef0123456789";  
 
     std::string encryptPassword(const std::string& plainText) const {
         std::string cipherText;
@@ -38,8 +38,8 @@ private:
             StringSource(plainText, true,
                 new StreamTransformationFilter(encryption,
                     new StringSink(cipherText)
-                ) // StreamTransformationFilter
-            ); // StringSource
+                ) 
+            ); 
         } catch (const Exception& e) {
             cerr << "Encryption error: " << e.what() << endl;
         }

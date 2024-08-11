@@ -13,6 +13,7 @@ include_directories(/opt/homebrew/Cellar/cryptopp/8.9.0/include)
 include_directories(/opt/homebrew/Cellar/libpqxx/7.9.2/include)
 include_directories(/opt/homebrew/Cellar/boost/1.85.0/include)
 include_directories(/opt/homebrew/Cellar/cryptopp/8.9.0/include)
+include_directories(/opt/homebrew/Cellar/nlohmann-json/3.11.3/include)
 
 find_package(Boost 1.85.0 REQUIRED COMPONENTS locale)
 include_directories(${Boost_INCLUDE_DIRS})

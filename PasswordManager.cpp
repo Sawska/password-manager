@@ -5,6 +5,7 @@
 #include "env_parser.h"
 #include "cpp-terminal/terminal.hpp"
 #include "cpp-terminal/color.hpp"
+#include <random>
 #include <boost/locale.hpp>
 
 using namespace std;
@@ -190,4 +191,18 @@ PasswordUnit PasswordManager::select_from_passwords(const std::string& domain_na
         std::cerr << Term::color_fg(Term::Color::Name::Red) << "Error: " << e.what() << Term::color_fg(Term::Color::Name::Default) << std::endl;
     }
     return unit;
+}
+
+std::string PasswordManager::generate_password(size_t length) {
+    std::string result(length, '\0');  
+
+    std::random_device rd;          
+    std::mt19937 engine(rd());      
+    std::uniform_int_distribution<int> dist(0, 255); 
+
+    for (size_t i = 0; i < length; ++i) {
+        result[i] = static_cast<char>(dist(engine));
+    }
+
+    return result;
 }

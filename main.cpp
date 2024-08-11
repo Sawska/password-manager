@@ -7,6 +7,7 @@
 #include "crow.h"
 #include "env_parser.h"
 #include <thread>
+#include <nlohmann/json.hpp>
 
 const std::string ENV_FILE_PATH = "/Users/alexanderkorzh/Desktop/coding/password_manager/.env";
 
@@ -19,6 +20,22 @@ bool isValidPassword(const std::string& password) {
     
     std::regex valid_chars("[ -~]+"); 
     return std::regex_match(password, valid_chars);
+}
+
+void generatePassword(PasswordManager& pm) {
+    std::string domain_name,login,password;
+
+    password = pm.generate_password(16);
+
+    std::cout << Term::color_fg(Term::Color::Name::Green) << "This is your password " + password << Term::color_fg(Term::Color::Name::Default) << std::endl;
+    std::cout << Term::color_fg(Term::Color::Name::Red) << "Enter domain name: " << Term::color_fg(Term::Color::Name::Default) << std::endl;
+    std::cin >> domain_name;
+    std::cout << Term::color_fg(Term::Color::Name::Red) << "Enter login: " << Term::color_fg(Term::Color::Name::Default) << std::endl;
+    std::cin >> login;
+
+    
+
+    pm.add_password(domain_name,login,password);
 }
 
 void addPassword(PasswordManager& pm) {
@@ -149,71 +166,6 @@ std::string join(const std::vector<std::string>& vec, const std::string& delimit
     return oss.str();
 }
 
-void runServer(PasswordManager& pm) {
-    crow::SimpleApp app;
-    crow::mustache::set_base(".");
-
-    CROW_ROUTE(app, "/store_form_data")
-    .methods("POST"_method)
-    ([&](const crow::request& req) {
-        auto x = crow::json::load(req.body);
-        crow::json::wvalue res;
-
-        if (!x) {
-            res["status"] = "error";
-            res["message"] = "Invalid JSON payload";
-            crow::response response(res);
-            response.add_header("Access-Control-Allow-Origin", "*"); 
-            response.add_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-            response.add_header("Access-Control-Allow-Headers", "Content-Type");
-            return response;
-        }
-
-        
-        std::vector<std::string> missing_keys;
-        if (!x.has("domain")) {
-            missing_keys.push_back("domain");
-        }
-        if (!x.has("login")) {
-            missing_keys.push_back("login");
-        }
-        if (!x.has("password")) {
-            missing_keys.push_back("password");
-        }
-
-        if (!missing_keys.empty()) {
-            res["status"] = "error";
-            res["message"] = "Missing keys: " + join(missing_keys, ", ");
-        std::cout << "Missing keys: " + join(missing_keys, ", ") << std::endl;
-            crow::response response(res);
-            response.add_header("Access-Control-Allow-Origin", "*"); 
-            response.add_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-            response.add_header("Access-Control-Allow-Headers", "Content-Type");
-            return response;
-        }
-
-
-        std::string domain_name = x["domain"].s();
-        std::string login = x["login"].s();
-        std::string password = x["password"].s();
-
-        PasswordUnit unit(domain_name, login, password);
-        pm.add_password(domain_name, login, password);
-
-        res["status"] = "success";
-
-        crow::response response(res);
-        response.add_header("Access-Control-Allow-Origin", "*"); 
-        response.add_header("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-        response.add_header("Access-Control-Allow-Headers", "Content-Type");
-
-        return response;
-    });
-
-    app.port(8080).multithreaded().run();
-}
-
-
 
 
 
@@ -258,7 +210,7 @@ int main() {
         std::cout << "4) Update password" << std::endl;
         std::cout << "5) Update secret password" << std::endl;
         std::cout << "6) Remove password" << std::endl;
-        std::cout << "7) Run server" << std::endl;
+        std::cout << "7) Generate password" << std::endl;
         std::cout << "8) Exit" << std::endl;
 
         std::cin >> option;
@@ -291,9 +243,7 @@ int main() {
                     removePassword(pm);
                     break;
                 case 7:
-                    server_thread = std::thread(runServer, std::ref(pm));
-                    server_thread.detach();
-                    std::cout << Term::color_fg(Term::Color::Name::Green) << "Server running on port 8080" << Term::color_fg(Term::Color::Name::Default) << std::endl;
+                    generatePassword(pm);
                     break;
 
                 case 8:
